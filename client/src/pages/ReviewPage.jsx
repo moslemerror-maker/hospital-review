@@ -109,20 +109,19 @@ export default function ReviewPage() {
       });
 
       if (res.data.action === 'redirect_google') {
-        // ── 4 or 5 stars: redirect to Google review page directly ─────────
+        // ── 4 or 5 stars: send the visitor to Google to leave a review ─────
         // NOTE: Google does not allow pre-selecting stars via URL — this is
         // a hard Google security rule. The page opens on the review form
         // and the visitor selects stars themselves.
         //
-        // We navigate the SAME tab (location.href), not window.open(_blank).
-        // A new-tab popup triggered after an async API call falls outside
-        // the synchronous user-gesture chain most mobile browsers require,
-        // and is blocked outright by WhatsApp's in-app browser — which is
-        // exactly where most visitors are coming from. A same-tab redirect
-        // is not subject to that popup-blocking policy.
+        // We deliberately do NOT auto-navigate via window.location.href here.
+        // Android App Links / iOS Universal Links — which hand this off to
+        // the native Google Maps app instead of the browser — are only
+        // reliably honored on a genuine, direct tap on a real <a href> link,
+        // not a script-triggered redirect. So the next screen renders a real
+        // anchor tag as the primary CTA instead of auto-redirecting.
         setGoogleUrl(res.data.googleUrl);
         setStep('google_opened');
-        window.location.href = res.data.googleUrl;
 
       } else {
         // ── 3 stars or below: show complaint form ─────────────────────────
@@ -288,22 +287,18 @@ export default function ReviewPage() {
         </div>
 
         <p className="text-gray-500 text-sm mb-1">
-          Redirecting you to Google Reviews...
+          One last tap to post your review on Google.
         </p>
         <p className="text-gray-400 text-xs mb-6">
           Please select <strong>{rating} star{rating > 1 ? 's' : ''}</strong> there and tap <strong>Post</strong>.
         </p>
 
-        <p className="text-xs text-gray-300">
-          If you weren't redirected,{' '}
-          <button
-            type="button"
-            onClick={() => { window.location.href = googleUrl; }}
-            className="text-blue-400 underline"
-          >
-            click here
-          </button>
-        </p>
+        <a
+          href={googleUrl}
+          className="w-full inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl text-lg transition-colors"
+        >
+          Open Google Reviews →
+        </a>
       </div>
     </PageShell>
   );
