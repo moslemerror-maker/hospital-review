@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, User, Lock, Eye, EyeOff, ShieldAlert, ClipboardCheck, MessageSquareText } from 'lucide-react';
+import { User, Lock, Eye, EyeOff, ShieldAlert, ClipboardCheck, MessageSquareText } from 'lucide-react';
 import API from '../api';
 
 export default function LoginPage() {
@@ -39,14 +39,14 @@ export default function LoginPage() {
       {/* ── Left panel — branding ───────────────────────────────────────── */}
       <div className="hidden lg:flex lg:w-1/2 bg-slate-900 flex-col items-center justify-center p-12">
         <div className="text-center max-w-sm">
-          <div className="w-16 h-16 bg-white/10 rounded-xl flex items-center justify-center mx-auto mb-6 border border-white/10">
-            <Building2 className="w-8 h-8 text-white" strokeWidth={1.75} />
+          <div className="w-20 h-20 rounded-full overflow-hidden mx-auto mb-6 bg-white">
+            <img src="/logo-mh.jpg" alt="Marwari Hospital" className="w-full h-full object-cover" />
           </div>
           <h1 className="text-2xl font-semibold text-white leading-tight mb-1">
             Marwari Hospital
           </h1>
           <p className="text-slate-400 text-sm font-medium mb-10 tracking-wide uppercase">
-            Hospital Information Management System
+            Internal Review System
           </p>
           <div className="space-y-4 text-left">
             {[
@@ -71,11 +71,11 @@ export default function LoginPage() {
 
           {/* Mobile header (hidden on desktop) */}
           <div className="lg:hidden text-center mb-8">
-            <div className="w-14 h-14 bg-slate-900 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <Building2 className="w-7 h-7 text-white" strokeWidth={1.75} />
+            <div className="w-16 h-16 rounded-full overflow-hidden mx-auto mb-4">
+              <img src="/logo-mh.jpg" alt="Marwari Hospital" className="w-full h-full object-cover" />
             </div>
             <h1 className="text-xl font-semibold text-slate-900">Marwari Hospital</h1>
-            <p className="text-slate-500 text-sm mt-0.5">Hospital Information Management System</p>
+            <p className="text-slate-500 text-sm mt-0.5">Internal Review System</p>
           </div>
 
           <div className="bg-white rounded-xl shadow-sm p-8 border border-slate-200">
