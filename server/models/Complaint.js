@@ -12,7 +12,7 @@ const complaintSchema = new mongoose.Schema({
   },
   phone: {
     type: String,
-    default: ''
+    required: true
   },
   rating: {
     type: Number,

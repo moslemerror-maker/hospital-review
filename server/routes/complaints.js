@@ -7,8 +7,8 @@ const { protect, requirePermission } = require('../middleware/auth');
 // POST /api/complaints — public visitor submission
 router.post('/', async (req, res) => {
   const { campaignId, visitorName, phone, rating, description, department } = req.body;
-  if (!campaignId || !rating || !description) {
-    return res.status(400).json({ message: 'Campaign, rating and description are required' });
+  if (!campaignId || !rating || !description || !phone) {
+    return res.status(400).json({ message: 'Campaign, rating, description and contact number are required' });
   }
   try {
     const complaint = await Complaint.create({

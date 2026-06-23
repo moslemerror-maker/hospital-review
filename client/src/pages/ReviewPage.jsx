@@ -144,6 +144,10 @@ export default function ReviewPage() {
       setCompError('Please describe your experience before submitting.');
       return;
     }
+    if (!phone.trim()) {
+      setCompError('Please provide a contact number so our team can follow up.');
+      return;
+    }
     setSubmitting(true);
 
     try {
@@ -352,8 +356,8 @@ export default function ReviewPage() {
 
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-            Contact Number{' '}
-            <span className="text-gray-300 font-normal">(optional — so we can follow up)</span>
+            Contact Number <span className="text-red-400">*</span>{' '}
+            <span className="text-gray-300 font-normal">(so we can follow up)</span>
           </label>
           <input
             type="tel"
@@ -368,7 +372,7 @@ export default function ReviewPage() {
         <button
           type="button"
           onClick={handleComplaintSubmit}
-          disabled={!description.trim() || submitting}
+          disabled={!description.trim() || !phone.trim() || submitting}
           className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-200 disabled:text-gray-400 text-white font-bold py-4 rounded-2xl text-base transition-colors"
         >
           {submitting ? (
