@@ -23,4 +23,13 @@ const protect = (req, res, next) => {
   }
 };
 
-module.exports = { protect };
+// Gate a route behind a named permission. Superadmin always passes — staff
+// must have that permission key in their JWT-issued permissions array.
+const requirePermission = (permission) => (req, res, next) => {
+  if (req.admin.role === 'superadmin' || req.admin.permissions?.includes(permission)) {
+    return next();
+  }
+  return res.status(403).json({ message: 'You do not have access to this section.' });
+};
+
+module.exports = { protect, requirePermission };

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { ArrowLeft, Star, CheckCircle2, AlertTriangle, Download, Check, MessageCircle, Lightbulb } from 'lucide-react';
 import AdminLayout from '../components/AdminLayout';
 import API from '../api';
 
@@ -17,7 +18,7 @@ export default function CampaignDetailPage() {
   const [waPhone, setWaPhone] = useState('');
   const [waName, setWaName] = useState('');
   const [waSending, setWaSending] = useState(false);
-  const [waSent, setWaSent] = useState('');
+  const [waSent, setWaSent] = useState(null); // { ok: boolean, text: string }
 
   useEffect(() => {
     loadAll();
@@ -66,7 +67,7 @@ export default function CampaignDetailPage() {
     e.preventDefault();
 
     setWaSending(true);
-    setWaSent('');
+    setWaSent(null);
 
     try {
       await API.post('/whatsapp/send-review-request', {
@@ -75,16 +76,13 @@ export default function CampaignDetailPage() {
         campaignId: id
       });
 
-      setWaSent('✅ WhatsApp message sent successfully!');
+      setWaSent({ ok: true, text: 'WhatsApp message sent successfully!' });
 
       setWaPhone('');
       setWaName('');
 
     } catch (err) {
-      setWaSent(
-        '❌ ' +
-        (err.response?.data?.message || 'Failed to send')
-      );
+      setWaSent({ ok: false, text: err.response?.data?.message || 'Failed to send' });
     } finally {
       setWaSending(false);
     }
@@ -94,7 +92,7 @@ export default function CampaignDetailPage() {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-4 border-slate-300 border-t-slate-900 rounded-full animate-spin"></div>
         </div>
       </AdminLayout>
     );
@@ -103,7 +101,7 @@ export default function CampaignDetailPage() {
   if (!campaign) {
     return (
       <AdminLayout>
-        <div className="p-8 text-center text-gray-400">
+        <div className="p-8 text-center text-slate-400">
           Campaign not found.
         </div>
       </AdminLayout>
@@ -111,21 +109,9 @@ export default function CampaignDetailPage() {
   }
 
   const statBoxes = [
-    {
-      label: 'Total Reviews',
-      value: campaign.totalReviews,
-      icon: '⭐'
-    },
-    {
-      label: 'Sent to Google',
-      value: campaign.googleRedirects,
-      icon: '✅'
-    },
-    {
-      label: 'Complaints',
-      value: campaign.totalComplaints,
-      icon: '⚠️'
-    },
+    { label: 'Total Reviews',  value: campaign.totalReviews,    Icon: Star },
+    { label: 'Sent to Google', value: campaign.googleRedirects, Icon: CheckCircle2 },
+    { label: 'Complaints',     value: campaign.totalComplaints, Icon: AlertTriangle },
   ];
 
   return (
@@ -135,48 +121,37 @@ export default function CampaignDetailPage() {
         {/* Back Button */}
         <button
           onClick={() => navigate('/admin')}
-          className="text-gray-400 hover:text-gray-600 text-sm mb-4 flex items-center gap-1"
+          className="text-slate-500 hover:text-slate-700 text-sm mb-4 flex items-center gap-1.5"
         >
-          ← Back to Dashboard
+          <ArrowLeft className="w-3.5 h-3.5" strokeWidth={1.75} /> Back to Dashboard
         </button>
 
         {/* Title */}
-        <h1 className="text-2xl font-bold text-gray-800 mb-1">
+        <h1 className="text-xl font-semibold text-slate-900 mb-1">
           {campaign.name}
         </h1>
 
-        <p className="text-gray-400 text-sm mb-6">
-          📍 {campaign.location}
-          &nbsp;·&nbsp;
-
-          <span
-            className={
-              campaign.isActive
-                ? 'text-green-500'
-                : 'text-gray-400'
-            }
-          >
-            {campaign.isActive
-              ? '● Active'
-              : '○ Inactive'}
+        <p className="text-slate-500 text-sm mb-6 flex items-center gap-2">
+          {campaign.location}
+          <span className="text-slate-300">·</span>
+          <span className={campaign.isActive ? 'text-green-600' : 'text-slate-400'}>
+            {campaign.isActive ? 'Active' : 'Inactive'}
           </span>
         </p>
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4 mb-8">
-          {statBoxes.map((s) => (
+          {statBoxes.map(({ label, value, Icon }) => (
             <div
-              key={s.label}
-              className="bg-white rounded-2xl border border-gray-200 p-5 text-center"
+              key={label}
+              className="bg-white rounded-xl border border-slate-200 p-5 text-center"
             >
-              <p className="text-3xl mb-1">{s.icon}</p>
-
-              <p className="text-3xl font-black text-gray-800">
-                {s.value}
+              <Icon className="w-5 h-5 text-slate-400 mx-auto mb-2" strokeWidth={1.5} />
+              <p className="text-2xl font-semibold text-slate-900">
+                {value}
               </p>
-
-              <p className="text-sm text-gray-400 mt-1">
-                {s.label}
+              <p className="text-sm text-slate-500 mt-1">
+                {label}
               </p>
             </div>
           ))}
@@ -186,13 +161,13 @@ export default function CampaignDetailPage() {
         <div className="grid md:grid-cols-2 gap-6">
 
           {/* QR Card */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-6">
+          <div className="bg-white rounded-xl border border-slate-200 p-6">
 
-            <h2 className="text-lg font-bold text-gray-800 mb-1">
+            <h2 className="text-base font-semibold text-slate-900 mb-1">
               QR Code
             </h2>
 
-            <p className="text-sm text-gray-400 mb-5">
+            <p className="text-sm text-slate-500 mb-5">
               Print and place at reception or OPD.
               Visitors scan to leave a review.
             </p>
@@ -200,7 +175,7 @@ export default function CampaignDetailPage() {
             {qrData && (
               <div className="flex flex-col items-center">
 
-                <div className="border-4 border-gray-100 rounded-2xl p-3 shadow-sm mb-4">
+                <div className="border border-slate-100 rounded-xl p-3 mb-4">
                   <img
                     src={qrData.qr}
                     alt="QR Code for reviews"
@@ -208,7 +183,7 @@ export default function CampaignDetailPage() {
                   />
                 </div>
 
-                <p className="text-xs text-gray-300 text-center break-all mb-4 px-2">
+                <p className="text-xs text-slate-400 text-center break-all mb-4 px-2">
                   {qrData.url}
                 </p>
 
@@ -216,18 +191,16 @@ export default function CampaignDetailPage() {
 
                   <button
                     onClick={downloadQR}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-sm font-medium transition-colors inline-flex items-center justify-center gap-1.5"
                   >
-                    ⬇ Download PNG
+                    <Download className="w-4 h-4" strokeWidth={1.75} /> Download PNG
                   </button>
 
                   <button
                     onClick={() => copyToClipboard(qrData.url, 'qr')}
-                    className="flex-1 border-2 border-gray-200 text-gray-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors"
+                    className="flex-1 border border-slate-300 text-slate-600 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors inline-flex items-center justify-center gap-1.5"
                   >
-                    {copied === 'qr'
-                      ? '✓ Copied!'
-                      : 'Copy Link'}
+                    {copied === 'qr' ? <><Check className="w-4 h-4" strokeWidth={1.75} /> Copied!</> : 'Copy Link'}
                   </button>
 
                 </div>
@@ -236,28 +209,27 @@ export default function CampaignDetailPage() {
           </div>
 
           {/* WhatsApp Card */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-6">
+          <div className="bg-white rounded-xl border border-slate-200 p-6">
 
-            <h2 className="text-lg font-bold text-gray-800 mb-1">
+            <h2 className="text-base font-semibold text-slate-900 mb-1">
               WhatsApp Message
             </h2>
 
-            <p className="text-sm text-gray-400 mb-5">
+            <p className="text-sm text-slate-500 mb-5">
               Send this to patients after billing.
               One tap opens WhatsApp with a pre-written message.
             </p>
 
-            <div className="bg-green-50 border-2 border-green-100 rounded-xl p-4 mb-4">
+            <div className="bg-green-50 border border-green-100 rounded-lg p-4 mb-4">
 
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-green-500 text-lg">💬</span>
-
+                <MessageCircle className="w-4 h-4 text-green-600" strokeWidth={1.75} />
                 <p className="text-xs font-semibold text-green-700">
                   WhatsApp Share Link
                 </p>
               </div>
 
-              <p className="text-xs text-green-600 break-all font-mono leading-relaxed">
+              <p className="text-xs text-green-700 break-all font-mono leading-relaxed">
                 {waLink.substring(0, 100)}...
               </p>
             </div>
@@ -268,25 +240,24 @@ export default function CampaignDetailPage() {
                 href={waLink}
                 target="_blank"
                 rel="noreferrer"
-                className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors text-center"
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-lg text-sm font-medium transition-colors text-center"
               >
                 Open WhatsApp
               </a>
 
               <button
                 onClick={() => copyToClipboard(waLink, 'wa')}
-                className="flex-1 border-2 border-gray-200 text-gray-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors"
+                className="flex-1 border border-slate-300 text-slate-600 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
               >
-                {copied === 'wa'
-                  ? 'Copied!'
-                  : 'Copy Link'}
+                {copied === 'wa' ? 'Copied!' : 'Copy Link'}
               </button>
 
             </div>
 
-            <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-xl p-3">
-              <p className="text-xs text-yellow-700">
-                💡 <strong>Billing integration tip:</strong>
+            <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2">
+              <Lightbulb className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" strokeWidth={1.75} />
+              <p className="text-xs text-amber-800">
+                <strong>Billing integration tip:</strong>
                 {' '}
                 Copy this link and paste it into your billing
                 software's SMS/WhatsApp template.
@@ -299,25 +270,25 @@ export default function CampaignDetailPage() {
         </div>
 
         {/* Send via Gupshup WhatsApp */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 mt-6">
+        <div className="bg-white rounded-xl border border-slate-200 p-6 mt-6">
 
-          <h2 className="text-lg font-bold text-gray-800 mb-1">
+          <h2 className="text-base font-semibold text-slate-900 mb-1">
             Send via Gupshup WhatsApp
           </h2>
 
-          <p className="text-sm text-gray-400 mb-4">
+          <p className="text-sm text-slate-500 mb-4">
             Send review request directly to patient's WhatsApp number
           </p>
 
           {waSent && (
             <div
-              className={`rounded-xl p-3 text-sm mb-4 ${
-                waSent.startsWith('✅')
+              className={`rounded-lg p-3 text-sm mb-4 ${
+                waSent.ok
                   ? 'bg-green-50 text-green-700'
                   : 'bg-red-50 text-red-700'
               }`}
             >
-              {waSent}
+              {waSent.text}
             </div>
           )}
 
@@ -330,7 +301,7 @@ export default function CampaignDetailPage() {
               type="text"
               value={waName}
               onChange={(e) => setWaName(e.target.value)}
-              className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-green-500 text-sm"
+              className="flex-1 border border-slate-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-600/10 focus:border-green-500 text-sm"
               placeholder="Patient name"
             />
 
@@ -338,7 +309,7 @@ export default function CampaignDetailPage() {
               type="tel"
               value={waPhone}
               onChange={(e) => setWaPhone(e.target.value)}
-              className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-green-500 text-sm"
+              className="flex-1 border border-slate-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-600/10 focus:border-green-500 text-sm"
               placeholder="91XXXXXXXXXX"
               required
             />
@@ -346,11 +317,9 @@ export default function CampaignDetailPage() {
             <button
               type="submit"
               disabled={waSending}
-              className="bg-green-500 hover:bg-green-600 disabled:bg-gray-300 text-white px-6 py-2.5 rounded-xl text-sm font-semibold flex-shrink-0"
+              className="bg-green-600 hover:bg-green-700 disabled:bg-slate-300 text-white px-6 py-2.5 rounded-lg text-sm font-medium flex-shrink-0 transition-colors"
             >
-              {waSending
-                ? 'Sending...'
-                : 'Send 💬'}
+              {waSending ? 'Sending...' : 'Send'}
             </button>
 
           </form>

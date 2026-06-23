@@ -2,7 +2,7 @@ const express   = require('express');
 const router    = express.Router();
 const Complaint = require('../models/Complaint');
 const Campaign  = require('../models/Campaign');
-const { protect } = require('../middleware/auth');
+const { protect, requirePermission } = require('../middleware/auth');
 
 // POST /api/complaints — public visitor submission
 router.post('/', async (req, res) => {
@@ -32,7 +32,7 @@ router.post('/', async (req, res) => {
 });
 
 // GET /api/complaints — admin sees all; staff sees only their assigned ones
-router.get('/', protect, async (req, res) => {
+router.get('/', protect, requirePermission('complaints'), async (req, res) => {
   try {
     const { status, page = 1, limit = 20 } = req.query;
     const filter = {};
@@ -65,7 +65,7 @@ router.get('/', protect, async (req, res) => {
 });
 
 // GET /api/complaints/:id — single complaint detail
-router.get('/:id', protect, async (req, res) => {
+router.get('/:id', protect, requirePermission('complaints'), async (req, res) => {
   try {
     const complaint = await Complaint.findById(req.params.id)
       .populate('campaign',   'name location')
@@ -85,7 +85,7 @@ router.get('/:id', protect, async (req, res) => {
 });
 
 // PATCH /api/complaints/:id — update status, notes, assignment
-router.patch('/:id', protect, async (req, res) => {
+router.patch('/:id', protect, requirePermission('complaints'), async (req, res) => {
   const { status, adminNotes, assignedTo } = req.body;
   try {
     const complaint = await Complaint.findById(req.params.id);

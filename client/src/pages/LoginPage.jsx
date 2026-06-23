@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Building2, User, Lock, Eye, EyeOff, ShieldAlert, ClipboardCheck, MessageSquareText } from 'lucide-react';
 import API from '../api';
 
 export default function LoginPage() {
-  const [email,    setEmail]    = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [error,    setError]    = useState('');
@@ -15,11 +16,16 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      const res = await API.post('/auth/login', { email, password });
+      const res = await API.post('/auth/login', { username, password });
+      const { role, permissions = [] } = res.data.admin;
       localStorage.setItem('adminToken', res.data.token);
       localStorage.setItem('adminName',  res.data.admin.name);
-      localStorage.setItem('adminRole',  res.data.admin.role);
-      navigate('/admin');
+      localStorage.setItem('adminRole',  role);
+      localStorage.setItem('adminPermissions', JSON.stringify(permissions));
+
+      // Land on the first section this account actually has access to
+      const canSeeDashboard = role === 'superadmin' || permissions.includes('dashboard');
+      navigate(canSeeDashboard ? '/admin' : permissions.includes('complaints') ? '/admin/complaints' : '/admin');
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid credentials. Please try again.');
     } finally {
@@ -28,36 +34,31 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex bg-slate-50">
 
       {/* ── Left panel — branding ───────────────────────────────────────── */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 flex-col items-center justify-center p-12 relative overflow-hidden">
-        {/* Decorative circles */}
-        <div className="absolute top-0 left-0 w-72 h-72 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2"/>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full translate-x-1/3 translate-y-1/3"/>
-        <div className="absolute top-1/2 left-1/2 w-48 h-48 bg-blue-500/20 rounded-full -translate-x-1/2 -translate-y-1/2"/>
-
-        <div className="relative z-10 text-center">
-          <div className="w-28 h-28 bg-white/10 backdrop-blur rounded-3xl flex items-center justify-center mx-auto mb-8 border border-white/20 shadow-2xl">
-            <span className="text-6xl">🏥</span>
+      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 flex-col items-center justify-center p-12">
+        <div className="text-center max-w-sm">
+          <div className="w-16 h-16 bg-white/10 rounded-xl flex items-center justify-center mx-auto mb-6 border border-white/10">
+            <Building2 className="w-8 h-8 text-white" strokeWidth={1.75} />
           </div>
-          <h1 className="text-3xl font-black text-white leading-tight mb-3">
+          <h1 className="text-2xl font-semibold text-white leading-tight mb-1">
             Marwari Hospital
           </h1>
-          <p className="text-blue-200 text-lg font-medium mb-8">
-            Internal Review System
+          <p className="text-slate-400 text-sm font-medium mb-10 tracking-wide uppercase">
+            Hospital Information Management System
           </p>
-          <div className="space-y-3">
+          <div className="space-y-4 text-left">
             {[
-              { icon: '⭐', text: 'Capture patient feedback instantly' },
-              { icon: '📊', text: 'Track complaints & resolutions' },
-              { icon: '💬', text: 'Auto WhatsApp review requests' },
-            ].map((item) => (
-              <div key={item.text} className="flex items-center gap-3 text-blue-100 text-sm">
-                <span className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                  {item.icon}
+              { Icon: ClipboardCheck,      text: 'Capture patient feedback instantly' },
+              { Icon: ShieldAlert,         text: 'Track complaints and resolutions' },
+              { Icon: MessageSquareText,   text: 'Automated WhatsApp review requests' },
+            ].map(({ Icon, text }) => (
+              <div key={text} className="flex items-center gap-3 text-slate-300 text-sm">
+                <span className="w-8 h-8 bg-white/5 rounded-lg flex items-center justify-center flex-shrink-0 border border-white/10">
+                  <Icon className="w-4 h-4" strokeWidth={1.75} />
                 </span>
-                {item.text}
+                {text}
               </div>
             ))}
           </div>
@@ -65,73 +66,71 @@ export default function LoginPage() {
       </div>
 
       {/* ── Right panel — login form ─────────────────────────────────────── */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center bg-gray-50 p-6">
-        <div className="w-full max-w-md">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6">
+        <div className="w-full max-w-sm">
 
           {/* Mobile header (hidden on desktop) */}
           <div className="lg:hidden text-center mb-8">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <span className="text-4xl">🏥</span>
+            <div className="w-14 h-14 bg-slate-900 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <Building2 className="w-7 h-7 text-white" strokeWidth={1.75} />
             </div>
-            <h1 className="text-2xl font-black text-gray-800">Marwari Hospital</h1>
-            <p className="text-gray-500 text-sm mt-1">Internal Review System</p>
+            <h1 className="text-xl font-semibold text-slate-900">Marwari Hospital</h1>
+            <p className="text-slate-500 text-sm mt-0.5">Hospital Information Management System</p>
           </div>
 
-          <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
-            <div className="mb-8">
-              <h2 className="text-2xl font-black text-gray-800">Welcome back</h2>
-              <p className="text-gray-400 text-sm mt-1">Sign in to your admin account</p>
+          <div className="bg-white rounded-xl shadow-sm p-8 border border-slate-200">
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold text-slate-900">Sign in</h2>
+              <p className="text-slate-500 text-sm mt-1">Use your assigned username and password</p>
             </div>
 
             {error && (
-              <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-2xl p-4 mb-6">
-                <span className="text-red-500 text-lg flex-shrink-0">⚠</span>
+              <div className="flex items-start gap-2.5 bg-red-50 border border-red-200 rounded-lg p-3 mb-5">
+                <ShieldAlert className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" strokeWidth={1.75} />
                 <p className="text-red-700 text-sm">{error}</p>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} autocomplete="off" className="space-y-5">
-              {/* Email */}
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Email Address
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Username
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">✉</span>
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" strokeWidth={1.75} />
                   <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full border-2 border-gray-200 rounded-2xl pl-10 pr-4 py-3.5 text-gray-800 placeholder-gray-300 focus:outline-none focus:border-blue-500 transition-colors"
-                    placeholder="your@email.com"
-                    autoComplete="off"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="w-full border border-slate-300 rounded-lg pl-9 pr-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition-colors"
+                    placeholder="Enter your username"
+                    autoComplete="username"
                     required
                   />
                 </div>
               </div>
 
-              {/* Password — NO default value, show/hide toggle */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Password
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">🔒</span>
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" strokeWidth={1.75} />
                   <input
                     type={showPass ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full border-2 border-gray-200 rounded-2xl pl-10 pr-12 py-3.5 text-gray-800 placeholder-gray-300 focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full border border-slate-300 rounded-lg pl-9 pr-10 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition-colors"
                     placeholder="Enter your password"
-                    autoComplete="new-password"
+                    autoComplete="current-password"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPass(!showPass)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                   >
-                    {showPass ? '🙈' : '👁'}
+                    {showPass ? <EyeOff className="w-4 h-4" strokeWidth={1.75} /> : <Eye className="w-4 h-4" strokeWidth={1.75} />}
                   </button>
                 </div>
               </div>
@@ -139,18 +138,18 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-gray-300 disabled:to-gray-400 text-white font-bold py-4 rounded-2xl text-base transition-all shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 disabled:shadow-none"
+                className="w-full bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white font-medium py-2.5 rounded-lg text-sm transition-colors mt-2"
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
-                    <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"/>
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"/>
                     Signing in...
                   </span>
-                ) : 'Sign In →'}
+                ) : 'Sign In'}
               </button>
             </form>
 
-            <p className="text-center text-xs text-gray-300 mt-6">
+            <p className="text-center text-xs text-slate-400 mt-6">
               Marwari Hospital · Internal Use Only
             </p>
           </div>

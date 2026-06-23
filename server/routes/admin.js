@@ -3,11 +3,11 @@ const router    = express.Router();
 const Review    = require('../models/Review');
 const Complaint = require('../models/Complaint');
 const Campaign  = require('../models/Campaign');
-const { protect } = require('../middleware/auth');
+const { protect, requirePermission } = require('../middleware/auth');
 
 // ─── GET /api/admin/stats ─────────────────────────────────────────────────────
 // Dashboard summary numbers
-router.get('/stats', protect, async (req, res) => {
+router.get('/stats', protect, requirePermission('dashboard'), async (req, res) => {
   try {
     const [
       totalReviews,

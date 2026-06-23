@@ -21,6 +21,8 @@ API.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('adminToken');
       localStorage.removeItem('adminName');
+      localStorage.removeItem('adminRole');
+      localStorage.removeItem('adminPermissions');
       window.location.href = '/login';
     }
     return Promise.reject(error);

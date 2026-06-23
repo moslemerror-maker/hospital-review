@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Star, CheckCircle2, X } from 'lucide-react';
 import AdminLayout from '../components/AdminLayout';
 import API from '../api';
 
@@ -9,10 +10,26 @@ const STATUS_STYLES = {
 };
 
 const STAR_LABEL = {
-  1: '😞 Very Poor',
-  2: '😕 Poor',
-  3: '😐 Average'
+  1: 'Very Poor',
+  2: 'Poor',
+  3: 'Average'
 };
+
+function StarRating({ rating, size = 'text-lg' }) {
+  return (
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map((s) => (
+        <Star
+          key={s}
+          className={size === 'text-xl' ? 'w-4.5 h-4.5' : 'w-4 h-4'}
+          strokeWidth={1.5}
+          fill={s <= rating ? '#FBBF24' : '#E5E7EB'}
+          stroke={s <= rating ? '#FBBF24' : '#E5E7EB'}
+        />
+      ))}
+    </div>
+  );
+}
 
 export default function ComplaintsPage() {
   const [complaints, setComplaints] = useState([]);
@@ -22,7 +39,6 @@ export default function ComplaintsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // NEW
   const [staffList, setStaffList] = useState([]);
   const [assignTo, setAssignTo] = useState('');
 
@@ -105,11 +121,11 @@ export default function ComplaintsPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">
+            <h1 className="text-xl font-semibold text-slate-900">
               Complaints
             </h1>
 
-            <p className="text-gray-400 text-sm mt-1">
+            <p className="text-slate-500 text-sm mt-1">
               Feedback from visitors who rated 3 stars or below
             </p>
           </div>
@@ -121,10 +137,10 @@ export default function ComplaintsPage() {
             <button
               key={f.value}
               onClick={() => setFilter(f.value)}
-              className={`px-5 py-2 rounded-xl text-sm font-semibold transition-colors border-2 ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
                 filter === f.value
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white text-gray-500 border-gray-200 hover:border-blue-300'
+                  ? 'bg-slate-900 text-white border-slate-900'
+                  : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'
               }`}
             >
               {f.label}
@@ -133,21 +149,21 @@ export default function ComplaintsPage() {
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center py-16">
-              <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-8 h-8 border-4 border-slate-300 border-t-slate-900 rounded-full animate-spin"></div>
             </div>
           ) : complaints.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-4xl mb-3">✅</p>
-              <p className="text-gray-400 font-medium">
+              <CheckCircle2 className="w-10 h-10 text-slate-300 mx-auto mb-3" strokeWidth={1.5} />
+              <p className="text-slate-500 font-medium">
                 No complaints found
               </p>
             </div>
           ) : (
             <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-100">
+              <thead className="bg-slate-50 border-b border-slate-100">
                 <tr>
                   {[
                     'Visitor',
@@ -162,7 +178,7 @@ export default function ComplaintsPage() {
                   ].map((h) => (
                     <th
                       key={h}
-                      className="text-left px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide"
+                      className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide"
                     >
                       {h}
                     </th>
@@ -170,20 +186,20 @@ export default function ComplaintsPage() {
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-slate-50">
                 {complaints.map((c) => (
                   <tr
                     key={c._id}
-                    className="hover:bg-gray-50 transition-colors"
+                    className="hover:bg-slate-50 transition-colors"
                   >
                     {/* Visitor */}
                     <td className="px-5 py-4">
-                      <p className="font-semibold text-gray-800 text-sm">
+                      <p className="font-medium text-slate-800 text-sm">
                         {c.visitorName}
                       </p>
 
                       {c.phone && (
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-slate-400">
                           {c.phone}
                         </p>
                       )}
@@ -191,50 +207,36 @@ export default function ComplaintsPage() {
 
                     {/* Rating */}
                     <td className="px-5 py-4">
-                      <div className="flex gap-0.5">
-                        {[1, 2, 3, 4, 5].map((s) => (
-                          <span
-                            key={s}
-                            className={`text-lg ${
-                              s <= c.rating
-                                ? 'text-yellow-400'
-                                : 'text-gray-100'
-                            }`}
-                          >
-                            ★
-                          </span>
-                        ))}
-                      </div>
-
-                      <p className="text-xs text-gray-400 mt-0.5">
+                      <StarRating rating={c.rating} />
+                      <p className="text-xs text-slate-400 mt-0.5">
                         {STAR_LABEL[c.rating]}
                       </p>
                     </td>
 
                     {/* Campaign */}
-                    <td className="px-5 py-4 text-sm text-gray-600">
+                    <td className="px-5 py-4 text-sm text-slate-600">
                       {c.campaign?.name || '—'}
                     </td>
 
                     {/* Department */}
-                    <td className="px-5 py-4 text-sm text-gray-600">
+                    <td className="px-5 py-4 text-sm text-slate-600">
                       {c.department || '—'}
                     </td>
 
                     {/* Assigned To */}
-                    <td className="px-5 py-4 text-sm text-gray-600">
+                    <td className="px-5 py-4 text-sm text-slate-600">
                       {c.assignedTo?.name || '—'}
                     </td>
 
                     {/* Description */}
-                    <td className="px-5 py-4 text-sm text-gray-600 max-w-xs">
+                    <td className="px-5 py-4 text-sm text-slate-600 max-w-xs">
                       <p className="truncate">
                         {c.description}
                       </p>
                     </td>
 
                     {/* Date */}
-                    <td className="px-5 py-4 text-xs text-gray-400 whitespace-nowrap">
+                    <td className="px-5 py-4 text-xs text-slate-400 whitespace-nowrap">
                       {new Date(c.submittedAt).toLocaleDateString(
                         'en-IN',
                         {
@@ -258,7 +260,7 @@ export default function ComplaintsPage() {
                     <td className="px-5 py-4">
                       <button
                         onClick={() => openComplaint(c)}
-                        className="text-blue-500 hover:text-blue-700 text-sm font-semibold"
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                       >
                         Manage →
                       </button>
@@ -273,17 +275,17 @@ export default function ComplaintsPage() {
 
       {/* Complaint Detail Modal */}
       {selected && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
 
             {/* Modal Header */}
-            <div className="p-6 border-b border-gray-100 flex items-start justify-between sticky top-0 bg-white rounded-t-2xl">
+            <div className="p-6 border-b border-slate-100 flex items-start justify-between sticky top-0 bg-white rounded-t-xl">
               <div>
-                <h2 className="text-xl font-bold text-gray-800">
+                <h2 className="text-base font-semibold text-slate-900">
                   {selected.visitorName}
                 </h2>
 
-                <p className="text-gray-400 text-sm mt-0.5">
+                <p className="text-slate-500 text-sm mt-0.5">
                   {selected.phone || 'No phone provided'}
                   &nbsp;·&nbsp;
                   {selected.department || 'No department'}
@@ -292,9 +294,9 @@ export default function ComplaintsPage() {
 
               <button
                 onClick={() => setSelected(null)}
-                className="text-gray-300 hover:text-gray-500 text-2xl font-light ml-4"
+                className="text-slate-400 hover:text-slate-600 ml-4"
               >
-                ✕
+                <X className="w-5 h-5" strokeWidth={1.75} />
               </button>
             </div>
 
@@ -302,27 +304,13 @@ export default function ComplaintsPage() {
 
               {/* Rating */}
               <div>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">
                   Rating Given
                 </p>
 
                 <div className="flex items-center gap-2">
-                  <div className="flex gap-0.5">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <span
-                        key={s}
-                        className={`text-xl ${
-                          s <= selected.rating
-                            ? 'text-yellow-400'
-                            : 'text-gray-100'
-                        }`}
-                      >
-                        ★
-                      </span>
-                    ))}
-                  </div>
-
-                  <span className="text-sm text-gray-500">
+                  <StarRating rating={selected.rating} size="text-xl" />
+                  <span className="text-sm text-slate-500">
                     {STAR_LABEL[selected.rating]}
                   </span>
                 </div>
@@ -330,12 +318,12 @@ export default function ComplaintsPage() {
 
               {/* Description */}
               <div>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">
                   Visitor's Description
                 </p>
 
-                <div className="bg-red-50 border border-red-100 rounded-xl p-4">
-                  <p className="text-sm text-gray-700 leading-relaxed">
+                <div className="bg-red-50 border border-red-100 rounded-lg p-4">
+                  <p className="text-sm text-slate-700 leading-relaxed">
                     {selected.description}
                   </p>
                 </div>
@@ -343,18 +331,18 @@ export default function ComplaintsPage() {
 
               {/* Campaign */}
               <div>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">
                   Campaign
                 </p>
 
-                <p className="text-sm text-gray-700">
+                <p className="text-sm text-slate-700">
                   {selected.campaign?.name} - {selected.campaign?.location}
                 </p>
               </div>
 
               {/* Current Status */}
               <div>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">
                   Current Status
                 </p>
 
@@ -367,14 +355,14 @@ export default function ComplaintsPage() {
 
               {/* Admin Notes */}
               <div>
-                <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">
                   Internal Notes (visible to admin only)
                 </label>
 
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors text-sm resize-none"
+                  className="w-full border border-slate-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition-colors text-sm resize-none"
                   rows={3}
                   placeholder="Add notes about this complaint, what action was taken..."
                 />
@@ -383,14 +371,14 @@ export default function ComplaintsPage() {
               {/* Assign To */}
               {adminRole === 'superadmin' && (
                 <div>
-                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">
                     Assign To Staff Member
                   </label>
 
                   <select
                     value={assignTo}
                     onChange={(e) => setAssignTo(e.target.value)}
-                    className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500 text-sm bg-white"
+                    className="w-full border border-slate-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 text-sm bg-white"
                   >
                     <option value="">
                       — Unassigned —
@@ -415,7 +403,7 @@ export default function ComplaintsPage() {
                   <button
                     onClick={() => updateStatus('in-progress')}
                     disabled={saving}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white py-3 rounded-xl text-sm font-semibold transition-colors"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white py-2.5 rounded-lg text-sm font-medium transition-colors"
                   >
                     {saving
                       ? 'Saving...'
@@ -427,7 +415,7 @@ export default function ComplaintsPage() {
                   <button
                     onClick={() => updateStatus('resolved')}
                     disabled={saving}
-                    className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-green-300 text-white py-3 rounded-xl text-sm font-semibold transition-colors"
+                    className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-green-300 text-white py-2.5 rounded-lg text-sm font-medium transition-colors"
                   >
                     {saving
                       ? 'Saving...'

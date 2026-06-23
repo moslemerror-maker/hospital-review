@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Star, CheckCircle2, AlertTriangle, Clock, Plus, X, ClipboardList } from 'lucide-react';
 import AdminLayout from '../components/AdminLayout';
 import API from '../api';
 
@@ -62,25 +63,25 @@ export default function DashboardPage() {
     <AdminLayout>
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-          <p className="text-gray-400 text-sm">Loading...</p>
+          <div className="w-8 h-8 border-4 border-slate-300 border-t-slate-900 rounded-full animate-spin mx-auto mb-3"></div>
+          <p className="text-slate-400 text-sm">Loading...</p>
         </div>
       </div>
     </AdminLayout>
   );
 
   const statCards = stats ? [
-    { label: 'Total Reviews',     value: stats.totalReviews,      icon: '⭐', color: 'blue'   },
-    { label: 'Sent to Google',    value: stats.googleRedirects,   icon: '✅', color: 'green'  },
-    { label: 'Total Complaints',  value: stats.totalComplaints,   icon: '⚠️', color: 'orange' },
-    { label: 'Pending Action',    value: stats.pendingComplaints, icon: '🕐', color: 'red'    },
+    { label: 'Total Reviews',     value: stats.totalReviews,      Icon: Star,          color: 'blue'   },
+    { label: 'Sent to Google',    value: stats.googleRedirects,   Icon: CheckCircle2,  color: 'green'  },
+    { label: 'Total Complaints',  value: stats.totalComplaints,   Icon: AlertTriangle, color: 'orange' },
+    { label: 'Pending Action',    value: stats.pendingComplaints, Icon: Clock,         color: 'red'    },
   ] : [];
 
   const colorMap = {
-    blue:   'border-blue-200 bg-blue-50',
-    green:  'border-green-200 bg-green-50',
-    orange: 'border-orange-200 bg-orange-50',
-    red:    'border-red-200 bg-red-50',
+    blue:   { border: 'border-slate-200', icon: 'text-blue-600 bg-blue-50' },
+    green:  { border: 'border-slate-200', icon: 'text-green-600 bg-green-50' },
+    orange: { border: 'border-slate-200', icon: 'text-orange-600 bg-orange-50' },
+    red:    { border: 'border-slate-200', icon: 'text-red-600 bg-red-50' },
   };
 
   return (
@@ -90,80 +91,82 @@ export default function DashboardPage() {
         {/* Page header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-            <p className="text-gray-400 text-sm mt-1">Manage your review campaigns</p>
+            <h1 className="text-xl font-semibold text-slate-900">Dashboard</h1>
+            <p className="text-slate-500 text-sm mt-1">Manage your review campaigns</p>
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-semibold transition-colors shadow-sm"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-1.5"
           >
-            + New Campaign
+            <Plus className="w-4 h-4" strokeWidth={2} /> New Campaign
           </button>
         </div>
 
         {/* Stat cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {statCards.map((card) => (
-            <div key={card.label} className={`rounded-2xl border-2 p-5 ${colorMap[card.color]}`}>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-2xl">{card.icon}</span>
-                <span className="text-3xl font-black text-gray-800">{card.value}</span>
+          {statCards.map(({ label, value, Icon, color }) => (
+            <div key={label} className={`rounded-xl border ${colorMap[color].border} bg-white p-5`}>
+              <div className="flex items-center justify-between mb-3">
+                <span className={`w-9 h-9 rounded-lg flex items-center justify-center ${colorMap[color].icon}`}>
+                  <Icon className="w-4.5 h-4.5" strokeWidth={1.75} />
+                </span>
+                <span className="text-2xl font-semibold text-slate-900">{value}</span>
               </div>
-              <p className="text-sm font-medium text-gray-500">{card.label}</p>
+              <p className="text-sm font-medium text-slate-500">{label}</p>
             </div>
           ))}
         </div>
 
         {/* Campaigns table */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-            <h2 className="font-bold text-gray-800 text-lg">All Campaigns</h2>
-            <span className="text-sm text-gray-400">{campaigns.length} total</span>
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h2 className="font-semibold text-slate-900">All Campaigns</h2>
+            <span className="text-sm text-slate-400">{campaigns.length} total</span>
           </div>
 
           {campaigns.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-4xl mb-3">📋</p>
-              <p className="text-gray-400 font-medium">No campaigns yet</p>
-              <p className="text-gray-300 text-sm mt-1">Create your first campaign to get started</p>
+              <ClipboardList className="w-10 h-10 text-slate-300 mx-auto mb-3" strokeWidth={1.5} />
+              <p className="text-slate-500 font-medium">No campaigns yet</p>
+              <p className="text-slate-400 text-sm mt-1">Create your first campaign to get started</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-100">
+                <thead className="bg-slate-50 border-b border-slate-100">
                   <tr>
                     {['Campaign Name', 'Location', 'Total Reviews', 'Google Reviews', 'Complaints', 'Status', 'Actions'].map((h) => (
-                      <th key={h} className="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                      <th key={h} className="text-left px-6 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">
                         {h}
                       </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-slate-50">
                   {campaigns.map((c) => (
                     <tr
                       key={c._id}
                       onClick={() => navigate(`/admin/campaigns/${c._id}`)}
-                      className="hover:bg-blue-50 cursor-pointer transition-colors"
+                      className="hover:bg-slate-50 cursor-pointer transition-colors"
                     >
-                      <td className="px-6 py-4 font-semibold text-gray-800">{c.name}</td>
-                      <td className="px-6 py-4 text-gray-500 text-sm">{c.location}</td>
-                      <td className="px-6 py-4 text-gray-700 font-medium">{c.totalReviews}</td>
-                      <td className="px-6 py-4 text-green-600 font-semibold">{c.googleRedirects}</td>
-                      <td className="px-6 py-4 text-orange-600 font-semibold">{c.totalComplaints}</td>
+                      <td className="px-6 py-4 font-medium text-slate-800 text-sm">{c.name}</td>
+                      <td className="px-6 py-4 text-slate-500 text-sm">{c.location}</td>
+                      <td className="px-6 py-4 text-slate-700 text-sm font-medium">{c.totalReviews}</td>
+                      <td className="px-6 py-4 text-green-600 text-sm font-medium">{c.googleRedirects}</td>
+                      <td className="px-6 py-4 text-orange-600 text-sm font-medium">{c.totalComplaints}</td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
                           c.isActive
                             ? 'bg-green-100 text-green-700'
-                            : 'bg-gray-100 text-gray-500'
+                            : 'bg-slate-100 text-slate-500'
                         }`}>
-                          {c.isActive ? '● Active' : '○ Inactive'}
+                          {c.isActive ? 'Active' : 'Inactive'}
                         </span>
                       </td>
                       <td className="px-6 py-4">
                         <button
                           onClick={(e) => handleToggle(c._id, e)}
-                          className="text-xs text-gray-400 hover:text-gray-600 underline"
+                          className="text-xs text-slate-500 hover:text-slate-700 underline"
                         >
                           {c.isActive ? 'Deactivate' : 'Activate'}
                         </button>
@@ -180,62 +183,62 @@ export default function DashboardPage() {
 
       {/* ── Create Campaign Modal ─────────────────────────────────────────── */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
+        <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg">
 
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-800">Create New Campaign</h2>
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+              <h2 className="text-base font-semibold text-slate-900">Create New Campaign</h2>
               <button
                 onClick={() => { setShowModal(false); setFormError(''); }}
-                className="text-gray-400 hover:text-gray-600 text-xl font-light"
+                className="text-slate-400 hover:text-slate-600"
               >
-                ✕
+                <X className="w-5 h-5" strokeWidth={1.75} />
               </button>
             </div>
 
             <form onSubmit={handleCreate} className="p-6 space-y-4">
               {formError && (
-                <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl p-3 text-sm">
+                <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm">
                   {formError}
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                  Campaign Name <span className="text-red-400">*</span>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Campaign Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors"
+                  className="w-full border border-slate-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition-colors text-sm"
                   placeholder="e.g. General OPD Feedback 2024"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                  Department / Location <span className="text-red-400">*</span>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Department / Location <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors"
+                  className="w-full border border-slate-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition-colors text-sm"
                   placeholder="e.g. Cardiology OPD, 2nd Floor"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                  Description <span className="text-gray-300 font-normal">(optional)</span>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Description <span className="text-slate-400 font-normal">(optional)</span>
                 </label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors resize-none"
+                  className="w-full border border-slate-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition-colors resize-none text-sm"
                   rows={3}
                   placeholder="Brief description of this campaign..."
                 />
@@ -245,13 +248,13 @@ export default function DashboardPage() {
                 <button
                   type="button"
                   onClick={() => { setShowModal(false); setFormError(''); }}
-                  className="flex-1 border-2 border-gray-200 text-gray-600 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
+                  className="flex-1 border border-slate-300 text-slate-600 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition-colors"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-sm font-medium transition-colors"
                 >
                   Create Campaign
                 </button>

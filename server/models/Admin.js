@@ -6,10 +6,17 @@ const adminSchema = new mongoose.Schema({
     required: true,
     trim:     true
   },
-  email: {
+  username: {
     type:      String,
     required:  true,
     unique:    true,
+    lowercase: true,
+    trim:      true
+  },
+  email: {
+    type:      String,
+    unique:    true,
+    sparse:    true,
     lowercase: true,
     trim:      true
   },
@@ -21,6 +28,12 @@ const adminSchema = new mongoose.Schema({
     type:    String,
     enum:    ['superadmin', 'staff'],
     default: 'staff'
+  },
+  // Only consulted when role is 'staff' — superadmin always has full access.
+  // Controls which nav items/pages a staff member can see (see requirePermission).
+  permissions: {
+    type:    [String],
+    default: []
   },
   department: {
     type: mongoose.Schema.Types.ObjectId,

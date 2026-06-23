@@ -1,11 +1,13 @@
 const express = require('express');
 const router  = express.Router();
-const { protect } = require('../middleware/auth');
+const { protect, requirePermission } = require('../middleware/auth');
 const { sendReviewRequest, sendComplaintAcknowledgement } = require('../services/gupshup');
+
+router.use(protect, requirePermission('dashboard'));
 
 // POST /api/whatsapp/send-review-request
 // Admin triggers this after billing — sends review link to patient
-router.post('/send-review-request', protect, async (req, res) => {
+router.post('/send-review-request', async (req, res) => {
   const { phone, patientName, campaignId } = req.body;
 
   if (!phone || !campaignId) {
@@ -26,7 +28,7 @@ router.post('/send-review-request', protect, async (req, res) => {
 
 // POST /api/whatsapp/send-complaint-ack
 // Auto-sent when a complaint is submitted (or manually)
-router.post('/send-complaint-ack', protect, async (req, res) => {
+router.post('/send-complaint-ack', async (req, res) => {
   const { phone, patientName } = req.body;
 
   if (!phone) {

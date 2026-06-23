@@ -2,11 +2,13 @@ const express  = require('express');
 const router   = express.Router();
 const QRCode   = require('qrcode');
 const Campaign = require('../models/Campaign');
-const { protect } = require('../middleware/auth');
+const { protect, requirePermission } = require('../middleware/auth');
+
+router.use(protect, requirePermission('dashboard'));
 
 // ─── GET /api/campaigns ───────────────────────────────────────────────────────
 // Get all campaigns — admin only
-router.get('/', protect, async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const campaigns = await Campaign.find().sort({ createdAt: -1 });
     res.json(campaigns);
@@ -17,7 +19,7 @@ router.get('/', protect, async (req, res) => {
 
 // ─── POST /api/campaigns ──────────────────────────────────────────────────────
 // Create a new campaign — admin only
-router.post('/', protect, async (req, res) => {
+router.post('/', async (req, res) => {
   const { name, location, description } = req.body;
 
   if (!name || !location) {
@@ -39,7 +41,7 @@ router.post('/', protect, async (req, res) => {
 
 // ─── GET /api/campaigns/:id ───────────────────────────────────────────────────
 // Get single campaign details — admin only
-router.get('/:id', protect, async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const campaign = await Campaign.findById(req.params.id);
     if (!campaign) {
@@ -53,7 +55,7 @@ router.get('/:id', protect, async (req, res) => {
 
 // ─── GET /api/campaigns/:id/qr ───────────────────────────────────────────────
 // Generate a QR code image for this campaign — admin only
-router.get('/:id/qr', protect, async (req, res) => {
+router.get('/:id/qr', async (req, res) => {
   try {
     const campaign = await Campaign.findById(req.params.id);
     if (!campaign) {
@@ -81,7 +83,7 @@ router.get('/:id/qr', protect, async (req, res) => {
 
 // ─── GET /api/campaigns/:id/whatsapp ─────────────────────────────────────────
 // Generate a WhatsApp share link — admin only
-router.get('/:id/whatsapp', protect, async (req, res) => {
+router.get('/:id/whatsapp', async (req, res) => {
   try {
     const campaign = await Campaign.findById(req.params.id);
     if (!campaign) {
@@ -107,7 +109,7 @@ router.get('/:id/whatsapp', protect, async (req, res) => {
 
 // ─── PATCH /api/campaigns/:id/toggle ─────────────────────────────────────────
 // Activate or deactivate a campaign — admin only
-router.patch('/:id/toggle', protect, async (req, res) => {
+router.patch('/:id/toggle', async (req, res) => {
   try {
     const campaign = await Campaign.findById(req.params.id);
     if (!campaign) {
@@ -123,7 +125,7 @@ router.patch('/:id/toggle', protect, async (req, res) => {
 
 // ─── DELETE /api/campaigns/:id ────────────────────────────────────────────────
 // Delete a campaign — admin only
-router.delete('/:id', protect, async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
     await Campaign.findByIdAndDelete(req.params.id);
     res.json({ message: 'Campaign deleted' });
